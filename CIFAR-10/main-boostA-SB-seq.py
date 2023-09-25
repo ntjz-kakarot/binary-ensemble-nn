@@ -149,7 +149,9 @@ def train(epoch, sample_weights=torch.Tensor(np.ones((50000,1))/50000.0)):
     
     for batch_idx, (data, target) in enumerate(trainloader):
         bin_op.binarization()
-        data, target = Variable(data.cuda()), Variable(target.cuda())
+        if not args.cpu:
+            data, target = data.cuda(), target.cuda()
+        data, target = Variable(data), Variable(target)
         optimizer.zero_grad()
         output = model(data) 
         loss = criterion(output, target)
@@ -178,7 +180,10 @@ def test(save_name, best_acc, sample_weights=torch.Tensor(np.ones((50000,1))/500
             else:
                 data, target = items
 
-            data, target = Variable(data.cuda()), Variable(target.cuda())
+            if not args.cpu:
+                data, target = data.cuda(), target.cuda()
+            data, target = Variable(data), Variable(target)
+
             output = model(data)
             test_loss += criterion(output, target).item()
             pred = output.argmax(dim=1, keepdim=True)
@@ -210,7 +215,9 @@ def eval_test():
             else:
                 data, target = items
 
-            data, target = Variable(data.cuda()), Variable(target.cuda())
+            if not args.cpu:
+                data, target = data.cuda(), target.cuda()
+            data, target = Variable(data), Variable(target)
             output = model(data)
             test_loss += criterion(output, target).item()
             pred = output.argmax(dim=1, keepdim=True)
@@ -411,5 +418,5 @@ if __name__ == '__main__':
         final_loss_print_2 = np.mean(final_loss_total_2)
         print(f'\nTest accuracy from selected model 2: {1-final_loss_print_2:.4f}')
 
-    os._exit(0)
+    exit()
 
