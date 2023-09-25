@@ -107,6 +107,8 @@ for key, value in param_dict.items():
     else:
         params += [{'params': [value], 'lr': base_lr, 'weight_decay': 0.00001}]
 optimizer = optim.Adam(params, lr=base_lr, weight_decay=0.00001)
+print(f"Initialized learning rate: {optimizer.param_groups[0]['lr']}")
+
 
 
 # Set up loss functions
@@ -134,6 +136,9 @@ def reset_learning_rate(optimizer, lr=0.01):
 
 def save_state(model, best_acc, save_name, root_dir=args.root_dir):
     """Saves the model state."""
+    # Ensure the directory exists
+    if not os.path.exists(root_dir):
+        os.makedirs(root_dir)
     state = {
         'best_acc': best_acc,
         'state_dict': model.state_dict(),
