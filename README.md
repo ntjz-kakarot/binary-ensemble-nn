@@ -1,7 +1,7 @@
 An attempt to recreate updated implementation from [BENN-PyTorch](https://github.com/XinDongol/BENN-PyTorch/tree/master)
 
 Below is a snapshot of the directory strucutre required to run the code. Make sure to have the [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset downloaded as shown in *CIFAR-10-PY-Dataset*
-
+```
 ├── binary-ensemble-nn
 │   ├── CIFAR-10
 │   │   ├── data
@@ -33,4 +33,4 @@ Below is a snapshot of the directory strucutre required to run the code. Make su
     ├── data_batch_5
     ├── readme.html
     └── test_batch
-
+```
