@@ -1,15 +1,28 @@
 An attempt to recreate updated implementation from [BENN-PyTorch](https://github.com/XinDongol/BENN-PyTorch/tree/master)
 
-# Instructions to run the code
+### Instructions to run the code
 
-1. Create and prepare the environment:
+Create and prepare the environment:
 
 ```python
 conda create --name benn_env python=3.11
 conda activate benn_env
 ```
+Install libraries
 
-2. Download [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset, and 
+```python
+conda install future numpy pillow pyyaml six
+```
+
+Install Pytorch-CUDA (I have tested with both 11.8(Stable) and 12.1(Nightly))
+
+```python
+conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+```
+
+###
+
+Download [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset, and 
 
 Below is a snapshot of the directory strucutre required to run the code. Make sure to have the [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset downloaded as shown in *CIFAR-10-PY-Dataset*
 ```

@@ -1,6 +1,8 @@
 import numpy as np
 import os
 import pickle
+import urllib.request
+import tarfile
 
 def unpickle(file):
     """Load byte data from file"""
@@ -31,9 +33,35 @@ def load_cifar10_data(data_dir):
 
     return train_data, train_labels, test_data, test_labels
 
-def process_and_save_data():
-    # Adjust this path to the location of your CIFAR-10-PY-Dataset directory
-    data_dir = '../../CIFAR-10-PY-Dataset'
+def download_dataset(url, save_dir):
+    """Download and extract dataset to `save_dir`"""
+    # Create save directory if it doesn't exist
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    
+    # Define the path for the downloaded file and where to extract it
+    download_path = os.path.join(save_dir, 'cifar-10-python.tar.gz')
+    extract_path = os.path.join(save_dir, 'CIFAR-10-PY-Dataset')
+    
+    # Download the dataset
+    print("Downloading dataset...")
+    urllib.request.urlretrieve(url, download_path)
+    print(f"Dataset downloaded to {download_path}")
+    
+    # Extract the dataset
+    print("Extracting dataset...")
+    with tarfile.open(download_path, 'r:gz') as file:
+        file.extractall(path=extract_path)
+    print(f"Dataset extracted to {extract_path}")
+    
+    # Optionally, remove the downloaded tar.gz file after extraction
+    os.remove(download_path)
+    print(f"Removed {download_path}")
+
+    return extract_path  # Return the directory where the dataset was extracted
+
+def process_and_save_data(data_dir):
+    """Load CIFAR-10 data from `data_dir`, process it, and save it to disk"""
     
     train_data, train_labels, test_data, test_labels = load_cifar10_data(data_dir)
     
@@ -51,4 +79,7 @@ def process_and_save_data():
     print("Data processed and saved to './data/' directory.")
 
 if __name__ == '__main__':
-    process_and_save_data()
+    dataset_url = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
+    data_dir = download_dataset(dataset_url, './data')
+    process_and_save_data(data_dir)
+
