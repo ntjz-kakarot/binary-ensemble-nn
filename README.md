@@ -17,7 +17,7 @@ conda install future numpy pillow pyyaml six
 Install Pytorch-CUDA (I have tested with both 11.8(Stable) and 12.1(Nightly))
 
 ```python
-conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch-nightly -c nvidia
 ```
 
 ### Download and process the dataset
