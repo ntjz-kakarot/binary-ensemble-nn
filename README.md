@@ -1,5 +1,16 @@
 An attempt to recreate updated implementation from [BENN-PyTorch](https://github.com/XinDongol/BENN-PyTorch/tree/master)
 
+# Instructions to run the code
+
+1. Create and prepare the environment:
+
+```python
+conda create --name benn_env python=3.11
+conda activate benn_env
+```
+
+2. Download [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset, and 
+
 Below is a snapshot of the directory strucutre required to run the code. Make sure to have the [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset downloaded as shown in *CIFAR-10-PY-Dataset*
 ```
 ├── binary-ensemble-nn
