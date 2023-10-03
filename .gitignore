@@ -1,2 +1,3 @@
 # Ignore all .npy files
 *.npy
+*.tar
