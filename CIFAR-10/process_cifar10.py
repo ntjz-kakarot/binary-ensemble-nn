@@ -17,14 +17,14 @@ def load_cifar10_data(data_dir):
     
     # Load all training data (5 batches)
     for i in range(1, 6):
-        data_dic = unpickle(data_dir + "/data_batch_{}".format(i))
+        data_dic = unpickle(os.path.join(data_dir, f"data_batch_{i}"))
         if i == 1:
             train_data = data_dic['data']
         else:
             train_data = np.vstack((train_data, data_dic['data']))
         train_labels += data_dic['labels']
 
-    test_data_dic = unpickle(data_dir + "/test_batch")
+    test_data_dic = unpickle(os.path.join(data_dir, "test_batch"))
     test_data = test_data_dic['data']
     test_labels = test_data_dic['labels']
 
@@ -39,9 +39,8 @@ def download_dataset(url, save_dir):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     
-    # Define the path for the downloaded file and where to extract it
+    # Define the path for the downloaded file
     download_path = os.path.join(save_dir, 'cifar-10-python.tar.gz')
-    extract_path = os.path.join(save_dir, 'CIFAR-10-PY-Dataset')
     
     # Download the dataset
     print("Downloading dataset...")
@@ -51,14 +50,14 @@ def download_dataset(url, save_dir):
     # Extract the dataset
     print("Extracting dataset...")
     with tarfile.open(download_path, 'r:gz') as file:
-        file.extractall(path=extract_path)
-    print(f"Dataset extracted to {extract_path}")
+        file.extractall(path=save_dir)
+    print(f"Dataset extracted to {save_dir}")
     
     # Optionally, remove the downloaded tar.gz file after extraction
     os.remove(download_path)
     print(f"Removed {download_path}")
 
-    return extract_path  # Return the directory where the dataset was extracted
+    return os.path.join(save_dir, 'cifar-10-batches-py')  # Return the directory where the dataset was extracted
 
 def process_and_save_data(data_dir):
     """Load CIFAR-10 data from `data_dir`, process it, and save it to disk"""

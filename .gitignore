@@ -2,3 +2,4 @@
 *.npy
 *.tar
 *.pyc
+/CIFAR-10/data
