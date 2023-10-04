@@ -3,7 +3,11 @@ import torch
 import numpy as np
 import torchvision.transforms as transforms
 
-class CIFARDataset():
+class CIFARDataset(torch.utils.data.Dataset):
+    """
+    A dataset class for loading CIFAR data.
+    """
+
     def __init__(self, root=None, train=True, example_weight=None):
         """
         Initialize the CIFAR dataset.
@@ -16,25 +20,19 @@ class CIFARDataset():
         self.root = root
         self.train = train
         self.transform = transforms.ToTensor()  # Convert images to PyTorch tensors.
-        
-        if self.train:
-            train_data_path = os.path.join(root, 'train_data.npy')  # added .npy extension
-            train_labels_path = os.path.join(root, 'train_labels.npy')  # added .npy extension
-            self.train_data = np.load(open(train_data_path, 'rb'))
-            self.train_data = torch.from_numpy(self.train_data.astype('float32'))
-            self.train_labels = np.load(open(train_labels_path, 'rb')).astype('int')
-            self.example_weight = example_weight
-        else:
-            test_data_path = os.path.join(root, 'test_data.npy')  # added .npy extension
-            test_labels_path = os.path.join(root, 'test_labels.npy')  # added .npy extension
-            self.test_data = np.load(open(test_data_path, 'rb'))
-            self.test_data = torch.from_numpy(self.test_data.astype('float32'))
-            self.test_labels = np.load(open(test_labels_path, 'rb')).astype('int')
 
+        file_extension = ".npy"
+        data_path = os.path.join(root, 'train_data' + file_extension) if train else os.path.join(root, 'test_data' + file_extension)
+        labels_path = os.path.join(root, 'train_labels' + file_extension) if train else os.path.join(root, 'test_labels' + file_extension)
+
+        self.data = np.load(open(data_path, 'rb'))
+        self.data = torch.from_numpy(self.data.astype('float32'))
+        self.labels = np.load(open(labels_path, 'rb')).astype('int')
+        self.example_weight = example_weight
 
     def __len__(self):
         """Return the total number of samples in the dataset."""
-        return len(self.train_data) if self.train else len(self.test_data)
+        return len(self.data)
 
     def __getitem__(self, index):
         """
@@ -50,16 +48,16 @@ class CIFARDataset():
         """
         if self.train:
             if self.example_weight is not None:
-                img, target, weight = self.train_data[index], self.train_labels[index], self.example_weight[index]
+                img, target, weight = self.data[index], self.labels[index], self.example_weight[index]
                 return img, target, weight
             else:
-                img, target = self.train_data[index], self.train_labels[index]
+                img, target = self.data[index], self.labels[index]
                 return img, target
         else:
-            img, target = self.test_data[index], self.test_labels[index]
+            img, target = self.data[index], self.labels[index]
             return img, target
 
-def build_test_dataset(root='./data/', batch_size=1000, shuffle=False, num_workers=4):
+def build_test_loader(root='./data/', batch_size=1000, shuffle=False, num_workers=4):
     """
     Construct a DataLoader for the test dataset.
 
@@ -72,10 +70,10 @@ def build_test_dataset(root='./data/', batch_size=1000, shuffle=False, num_worke
     Returns:
     - DataLoader object for the test dataset.
     """
-    testset = CIFARDataset(root=root, train=False)
-    return torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    test_set = CIFARDataset(root=root, train=False)
+    return torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
 
-def build_train_dataset(mode, example_weight, root='./data/', batch_size=128, shuffle=False, num_workers=4):
+def build_train_loader(mode, example_weight, root='./data/', batch_size=128, shuffle=False, num_workers=4):
     """
     Construct a DataLoader for the training dataset with different sampling modes.
 
@@ -90,22 +88,22 @@ def build_train_dataset(mode, example_weight, root='./data/', batch_size=128, sh
     Returns:
     - DataLoader object for the training dataset based on the specified mode.
     """
-    trainset = CIFARDataset(root=root, train=True, example_weight=example_weight)
+    train_set = CIFARDataset(root=root, train=True, example_weight=example_weight)
     
     if mode == 'normal':
         # Regular data loading without any weights.
-        return torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+        return torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
     
     elif mode == 'sample_batch':
         # Sample batches based on the provided example weights.
-        sampler = torch.utils.data.sampler.WeightedRandomSampler(example_weight.double(), len(trainset))
-        return torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, sampler=sampler)
+        sampler = torch.utils.data.sampler.WeightedRandomSampler(example_weight.double(), len(train_set))
+        return torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, sampler=sampler)
     
     elif mode == 'sample_dataset':
         # Sample from a subset of indices without replacement.
         indices = example_weight
         sampler = torch.utils.data.sampler.SubsetRandomSampler(indices)
-        return torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, sampler=sampler)
+        return torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, sampler=sampler)
     
     else:
         raise ValueError(f"Undefined Mode: {mode}")

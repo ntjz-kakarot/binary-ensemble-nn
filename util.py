@@ -1,15 +1,15 @@
-import torch.nn as nn
-import numpy as np
-import torch.nn.functional as F
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import numpy as np
 
-def sto_quant(tensor):
+def stochastic_quantization(tensor):
     """
     Stochastic quantization: Maps tensor values to either -1 or 1 based on probabilistic rules.
     """
-    return (tensor + 1.).div(2.).add(torch.rand(tensor.size()).to(tensor.device).add(-0.5)).clamp(0.,1.).round().mul(2.).add(-1.)
+    return (tensor + 1.).div(2.).add(torch.rand(tensor.size()).to(tensor.device).add(-0.5)).clamp(0., 1.).round().mul(2.).add(-1.)
 
-class BinOp:
+class BinaryOperation:
     """
     Handles binarization operations for the parameters of a neural network.
     """
@@ -17,12 +17,11 @@ class BinOp:
         """
         Constructor: Initializes the object, counts Conv2d layers, and prepares for binarization based on mode.
         """
-        count_Conv2d = sum(1 for m in model.modules() if isinstance(m, nn.Conv2d))
-        
+        count_conv2d = sum(1 for m in model.modules() if isinstance(m, nn.Conv2d))
         assert mode in ['allbin', 'nin'], 'No such mode!'
-        start_range, end_range = (0, count_Conv2d-1) if mode == 'allbin' else (1, count_Conv2d-2)
+        start_range, end_range = (0, count_conv2d - 1) if mode == 'allbin' else (1, count_conv2d - 2)
 
-        self.bin_range = np.linspace(start_range, end_range, end_range-start_range+1).astype('int').tolist()
+        self.bin_range = np.linspace(start_range, end_range, end_range - start_range + 1).astype('int').tolist()
         self.saved_params = [m.weight.data.clone() for m in model.modules() if isinstance(m, nn.Conv2d) and m in self.bin_range]
         self.target_modules = [m.weight for m in model.modules() if isinstance(m, nn.Conv2d) and m in self.bin_range]
 
@@ -94,7 +93,7 @@ class BinOp:
             m_add = weight.sign().mul(module.grad.data).sum(3, keepdim=True).sum(2, keepdim=True).sum(1, keepdim=True).div(n).expand(s).mul(weight.sign())
             module.grad.data.add_(m_add).mul_(1.0 - 1.0/s[1]).mul_(n)
 
-class WeightedLoss(nn.Module):
+class CustomWeightedLoss(nn.Module):
     """
     Custom loss function that is weighted.
     """
@@ -102,7 +101,7 @@ class WeightedLoss(nn.Module):
         """
         Constructor: Initializes the type of aggregation.
         """
-        super(WeightedLoss, self).__init__()
+        super(CustomWeightedLoss, self).__init__()
         assert aggregate in ['normal_ce_mean', 's_ce_mean', 'sc_ce_mean'], 'Invalid mode'
         self.aggregate = aggregate
 
