@@ -137,12 +137,12 @@ class AdaBin_Conv2d(nn.Module):
         if bias:
             self.bias_params = nn.Parameter(torch.Tensor(out_channels))
         else:
-            self.register_parameter('bias', None)
+            self.register_parameter('bias_params', None)
         self.reset_parameters()
 
     def reset_parameters(self):
         nn.init.kaiming_uniform_(self.conv_params, a=np.sqrt(5))
-        if self.bias is not None:
+        if self.bias is not None and self.bias_params is not None:  # Check if self.bias_params is not None
             fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self.conv_params)
             bound = 1 / np.sqrt(fan_in)
             nn.init.uniform_(self.bias_params, -bound, bound)

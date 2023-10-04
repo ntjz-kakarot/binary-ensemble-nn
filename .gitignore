@@ -3,3 +3,4 @@
 *.tar
 *.pyc
 /CIFAR-10/data
+__pycache__

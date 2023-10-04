@@ -2,12 +2,14 @@ import argparse
 import datetime
 import os
 import sys
+sys.path.append('..')
 
 import numpy as np
 import torch
 from torch import nn, optim
 from torch.autograd import Variable
 from torch.utils.data.sampler import WeightedRandomSampler
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 import data
@@ -56,7 +58,7 @@ def main():
     testloader = DataLoader(testset, batch_size=1000, shuffle=False, num_workers=4)
 
     # Model Setup and Initialization
-    model = adabin_resnet_18()
+    model = adabin_resnet_18.binary_resnet18()
 
     # Use CUDA if available
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
