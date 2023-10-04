@@ -69,7 +69,7 @@ class BinaryOperation:
             if quant_mode == 'det':
                 module.data.mul_(m.expand(s)).sign_()
             elif quant_mode == 'sto':
-                module.data = sto_quant(module.data).mul(m.expand(s))
+                module.data = stochastic_quantization(module.data).mul(m.expand(s))
 
     def restore(self):
         """
@@ -119,3 +119,54 @@ class CustomWeightedLoss(nn.Module):
             oned_weights = weights.gather(1, target.unsqueeze(1)).squeeze()
             sep_loss = F.cross_entropy(input, target, reduction='none')
             return (sep_loss * oned_weights.to(input.device)).mean()
+
+class AdaBin_Conv2d(nn.Module):
+    """
+    Adaptive Binary Convolution layer.
+    """
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, bias=True):
+        super(AdaBin_Conv2d, self).__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.bias = bias
+        self.conv_params = nn.Parameter(torch.Tensor(out_channels, in_channels, kernel_size, kernel_size))
+        self.binary_op = BinaryOperation(self)
+        if bias:
+            self.bias_params = nn.Parameter(torch.Tensor(out_channels))
+        else:
+            self.register_parameter('bias', None)
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        nn.init.kaiming_uniform_(self.conv_params, a=np.sqrt(5))
+        if self.bias is not None:
+            fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self.conv_params)
+            bound = 1 / np.sqrt(fan_in)
+            nn.init.uniform_(self.bias_params, -bound, bound)
+
+    def forward(self, x):
+        self.binary_op.binarization()
+        binary_weight = self.binary_op.target_modules[0].data
+        if self.bias is None:
+            binary_bias = None
+        else:
+            binary_bias = self.bias_params
+        out = F.conv2d(x, binary_weight, binary_bias, self.stride, self.padding)
+        self.binary_op.restore()
+        return out
+
+class Maxout(nn.Module):
+    """
+    Maxout activation function.
+    """
+    def __init__(self, num_units):
+        super(Maxout, self).__init__()
+        self.num_units = num_units
+
+    def forward(self, x):
+        assert x.shape[1] % self.num_units == 0, "Number of features not divisible by num_units"
+        m, i = x.view(*x.shape[:1], x.shape[1] // self.num_units, self.num_units, *x.shape[2:]).max(2)
+        return m

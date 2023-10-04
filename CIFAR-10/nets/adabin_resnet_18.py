@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from utils.binarylib import AdaBin_Conv2d, Maxout
+from util import AdaBin_Conv2d, Maxout
 
 class BinaryBasicBlock(nn.Module):
     """
