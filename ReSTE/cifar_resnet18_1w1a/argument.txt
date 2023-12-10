@@ -1,0 +1,27 @@
+2023-11-26 10:30:36.696887
+
+results_dir:  ./cifar_resnet18_1w1a
+save:  
+resume:  False
+evaluate:  
+seed:  1234
+model:  resnet18_1w1a
+dataset:  cifar10
+data_path:  [DATA_PATH]
+ts_type:  torch.cuda.FloatTensor
+gpus:  0
+lr:  0.1
+weight_decay:  0.0001
+momentum:  0.9
+workers:  8
+epochs:  1000
+start_epoch:  -1
+batch_size:  256
+batch_size_test:  128
+print_freq:  100
+time_estimate:  1
+a32:  False
+warm_up:  True
+estimator:  ReSTE
+o_end:  3.0
+cal_ind:  False

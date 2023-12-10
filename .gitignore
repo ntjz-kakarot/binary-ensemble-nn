@@ -1,0 +1,5 @@
+# Ignore all .npy files
+*.npy
+/CIFAR-10/*.tar
+*.pyc
+/CIFAR-10/data
