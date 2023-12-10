@@ -1,6 +1,5 @@
 # Ignore list of files and directories
 *.npy
-*.tar
 *.pyc
 /data
 __pycache__
