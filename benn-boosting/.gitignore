@@ -1,0 +1,8 @@
+# Ignore list of files and directories
+*.npy
+*.pyc
+/data
+__pycache__
+/CIFAR-10/data
+/.vscode
+/.ipynb_checkpoints
